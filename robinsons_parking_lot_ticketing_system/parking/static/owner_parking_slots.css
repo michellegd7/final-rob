@@ -1,0 +1,283 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+ 
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 6vw;
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    border-bottom: 3px solid rgba(0,0,0,0.04);
+}
+ 
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    font-family: 'Times New Roman', Times, serif;
+}
+.nav-links a {
+    text-decoration: none;
+    font-size: 1rem;
+    color: black;
+}
+.nav-links a.active {
+    font-weight: 700;
+    border-bottom: 2px solid rgb(243, 5, 5);
+    padding-bottom: 2px;
+}
+ 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-family: 'Times New Roman', Times, serif;
+}
+.nav-actions a {
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+}
+ 
+.logo .logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+ 
+.page-header {
+    padding: 2.8rem 6vw 2rem;
+}
+.page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.8rem;
+    color: rgb(240, 14, 14);
+    margin-bottom: 0.4rem;
+}
+ 
+.slots-section {
+    padding: 0 6vw 4rem;
+}
+.section-label {
+    font-size: 1.20rem;
+    font-weight: 700;
+    color: black;
+    margin: 2rem 0 1rem;
+}
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.9rem;
+}
+ 
+.slot-card {
+    border-radius: 12px;
+    padding: 1.1rem 1rem 1rem;
+    border: 1.5px solid rgb(0, 0, 0);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+ 
+.slot-card.available { border: 2px solid rgb(99, 181, 103);  background: #fff; }
+.slot-card.occupied  { border: 2px solid rgb(168, 33, 33);   background: #fff; }
+ 
+.slot-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    border-radius: 50px;
+    padding: 0.22rem 0.6rem;
+}
+.slot-card.available .slot-badge { background: rgb(183, 221, 183); }
+.slot-card.occupied  .slot-badge { background: rgba(228, 135, 135, 0.15); }
+.slot-card.reserved  .slot-badge { background: rgba(41,128,185,0.15); }
+ 
+.badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+}
+.slot-label {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    line-height: 1;
+}
+.slot-type {
+    font-size: 0.75rem;
+    color: black;
+    font-weight: 500;
+}
+ 
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+ 
+.modal {
+    background: #fbfbfb;
+    border-radius: 16px;
+    padding: 2.2rem;
+    width: 100%;
+    max-width: 420px;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+ 
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.modal-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: green;
+}
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: black;
+    cursor: pointer;
+}
+ 
+.modal-spot-info {
+    background: #f4f4f4;
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.modal-spot-label {
+    font-size: 2rem;
+    font-weight: 700;
+    color: black;
+}
+.modal-spot-meta {
+    font-size: 0.82rem;
+    color: black;
+}
+.modal-spot-meta strong {
+    color: black;
+    display: block;
+}
+ 
+.modal-info-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+}
+.modal-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ebebeb;
+    padding-bottom: 0.6rem;
+}
+.modal-info-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.info-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+}
+.info-value {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #111;
+}
+.info-value.status-available { color: rgb(99, 181, 103); }
+.info-value.status-occupied  { color: rgb(168, 33, 33); }
+.info-value.status-reserved  { color: rgb(41, 128, 185); }
+ 
+.form-group { margin-bottom: 1.1rem; }
+.form-group input,
+.form-group select {
+    width: 100%;
+    border: 1.5px solid black;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.88rem;
+    color: black;
+    outline: none;
+    background: white;
+}
+ 
+.modal-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.6rem;
+}
+.btn-confirm {
+    flex: 1;
+    background: #fff;
+    color: #000;
+    border: 1.5px solid black;
+    border-radius: 50px;
+    padding: 0.82rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+.btn-close-modal {
+    border: 1.5px solid black;
+    background: #fff;
+    border-radius: 50px;
+    padding: 0.82rem 1.4rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: black;
+    cursor: pointer;
+}
+
+.btn-logout {
+  background: #d0021b;
+  color: #fff !important;
+  padding: 0.5rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  transition: background 0.15s !important;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+    nav { padding: 1rem 4vw; }
+    .nav-links { display: none; }
+    .slots-section { padding: 0 4vw 3rem; }
+    .page-header { padding: 2rem 4vw 1.5rem; }
+}

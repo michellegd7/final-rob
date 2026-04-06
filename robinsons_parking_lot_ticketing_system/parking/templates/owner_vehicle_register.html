@@ -1,0 +1,110 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}My Vehicles{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'owner_parking_slots.css' %}">
+  <link rel="stylesheet" href="{% static 'owner_vehicle_register.css' %}">
+{% endblock %}
+
+{% block content %}
+<nav>
+    <div class="logo">
+      <img src="{% static '/images/logo.png' %}" alt="logo" class="logo-img">
+    </div>
+    <ul class="nav-links">
+      <li><a href="{% url 'owner' %}">Home</a></li>
+      <li><a href="{% url 'owner_vehicle_register' %}" class="active">My Vehicles</a></li>
+      <li><a href="{% url 'owner_parking_slots' %}">Parking Slots</a></li>
+      <li><a href="{% url 'owner_my_ticket' %}">My Parking Tickets</a></li>
+    </ul>
+    <div class="nav-actions">
+      {% if owner %}
+        <a href="#">{{ owner.first_name }}</a>
+        <a href="{% url 'owner_logout' %}" class="btn-logout">Logout</a>
+      {% else %}
+        <a href="{% url 'owner_login' %}">Login</a>
+        <a href="{% url 'owner_register' %}" class="btn-signup">Sign Up</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>My Vehicles</h1>
+    <p>Register and manage your vehicles for parking reservations.</p>
+  </div>
+
+  <div class="register-section">
+
+    {% if success %}
+    <div class="form-success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+    <div class="form-error">{{ error }}</div>
+    {% endif %}
+
+    <div class="vehicle-list-panel">
+      <div class="vehicle-list-header">
+        <div class="vehicle-list-title">Registered Vehicles</div>
+        <span class="vehicle-count">{{ vehicles|length }} vehicle{{ vehicles|length|pluralize }}</span>
+      </div>
+
+      {% for v in vehicles %}
+      <div class="vehicle-row">
+        <div class="vehicle-details">
+          <div class="vehicle-plate">{{ v.plate_number }} <span class="vehicle-id-tag">#{{ v.id }}</span></div>
+          <div class="vehicle-meta">{{ v.vehicle_type }}</div>
+        </div>
+        <span class="vehicle-badge
+          {% if v.vehicle_type == 'Motorcycle' %}badge-motorcycle
+          {% elif v.vehicle_type == 'Van' %}badge-van
+          {% else %}badge-car{% endif %}">
+          {{ v.vehicle_type }}
+        </span>
+        <form method="POST" action="{% url 'owner_delete_vehicle' v.id %}" style="display:inline;"
+              onsubmit="return confirm('Remove {{ v.plate_number }} from your vehicles?')">
+          {% csrf_token %}
+          <button type="submit" class="btn-delete" title="Remove vehicle">✕</button>
+        </form>
+      </div>
+      {% empty %}
+      <div class="vehicle-empty">
+        No vehicles registered yet. Add one below.
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="register-card">
+      <div class="register-card-header">
+        <h2>Add a Vehicle</h2>
+      </div>
+      <div class="register-card-body">
+        <form method="POST" action="{% url 'owner_vehicle_register' %}">
+          {% csrf_token %}
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Plate Number</label>
+              <input type="text" name="plate_number" placeholder="e.g. ABC 1234"
+                     value="{{ form_data.plate_number|default:'' }}" required />
+            </div>
+            <div class="form-group">
+              <label>Vehicle Type</label>
+              <select name="vehicle_type" required>
+                <option value="" disabled {% if not form_data.vehicle_type %}selected{% endif %}>Select type</option>
+                <option value="Car"        {% if form_data.vehicle_type == 'Car' %}selected{% endif %}>Car</option>
+                <option value="Motorcycle" {% if form_data.vehicle_type == 'Motorcycle' %}selected{% endif %}>Motorcycle</option>
+                <option value="Van"        {% if form_data.vehicle_type == 'Van' %}selected{% endif %}>Van</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-register">Add Register Vehicle</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

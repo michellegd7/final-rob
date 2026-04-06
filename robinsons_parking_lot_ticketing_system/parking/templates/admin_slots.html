@@ -1,0 +1,219 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Parking Slots — Admin{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'admin_slots.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="modal-overlay" id="addSlotModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Slot</div>
+      <button class="modal-close" id="modalCloseBtn">✕</button>
+    </div>
+    <form method="POST" action="{% url 'admin_add_slot' %}" class="modal-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label" for="slot_number">Slot Number</label>
+        <input
+          type="text"
+          id="slot_number"
+          name="slot_number"
+          class="form-input"
+          placeholder="e.g. A-01"
+          required
+          maxlength="20"
+        >
+        <span class="form-hint">Use a unique identifier (e.g. A-01, B-12)</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="slot_type">Slot Type</label>
+        <select id="slot_type" name="slot_type" class="form-input form-select" required>
+          <option value="" disabled selected>Select type…</option>
+          <option value="Car">Car</option>
+          <option value="Motorcycle">Motorcycle</option>
+          <option value="Van">Van</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="modalCancelBtn">Cancel</button>
+        <button type="submit" class="btn-confirm">Add Slot</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="{% static 'images/logo.png' %}" alt="logo">
+      <div class="logo-text">Admin Portal<span>Robinson's Parking</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'admin_dashboard' %}" class="nav-item">Dashboard</a>
+      <a href="{% url 'admin_owners' %}"    class="nav-item">Owners</a>
+      <a href="{% url 'admin_guards' %}"    class="nav-item">Guards</a>
+      <a href="{% url 'admin_slots' %}"     class="nav-item active">Parking Slots</a>
+      <a href="{% url 'admin_tickets' %}"   class="nav-item">Tickets</a>
+      <a href="{% url 'admin_logout' %}"    class="nav-item">Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="guard-profile">
+        <div>
+          <div class="guard-name">Administrator</div>
+          <div class="guard-role">System Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2>Parking Slots</h2>
+        <p>Monitor real-time slot availability.</p>
+      </div>
+      <button class="btn-add-slot" id="openModalBtn">+ Add Slot</button>
+    </div>
+
+    <div class="page-content">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ slots|length }}</div>
+            <div class="stat-lbl">Total Slots</div>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div>
+            <div class="stat-num" id="availCount">0</div>
+            <div class="stat-lbl">Available</div>
+          </div>
+        </div>
+        <div class="stat-card red">
+          <div>
+            <div class="stat-num" id="occupCount">0</div>
+            <div class="stat-lbl">Occupied</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Slot Overview</div>
+          <div class="legend">
+            <span class="legend-available">● Available</span>
+            <span class="legend-occupied">● Occupied</span>
+          </div>
+        </div>
+        <div class="section-label">Level B1 — Ground Floor</div>
+        <div class="slots-grid">
+          {% for slot in slots %}
+          <div class="slot-card {{ slot.slot_status }}" data-status="{{ slot.slot_status }}">
+            <div class="slot-badge">{{ slot.slot_status|capfirst }}</div>
+            <div class="slot-label">{{ slot.slot_number }}</div>
+            <div class="slot-type">{{ slot.slot_type }}</div>
+            {% if slot.active_ticket %}
+            <div class="slot-plate">{{ slot.active_ticket.vehicle.plate_number }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Slot Details</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Slot</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Plate (if occupied)</th>
+                <th>Check In</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for slot in slots %}
+              <tr>
+                <td><strong>{{ slot.slot_number }}</strong></td>
+                <td>{{ slot.slot_type }}</td>
+                <td>
+                  {% if slot.slot_status == 'available' %}
+                    <span class="badge badge-available">Available</span>
+                  {% else %}
+                    <span class="badge badge-occupied">Occupied</span>
+                  {% endif %}
+                </td>
+                <td class="td-plate">{{ slot.active_ticket.vehicle.plate_number|default:"—" }}</td>
+                <td class="td-muted">{{ slot.active_ticket.entry_time|date:"M d, H:i"|default:"—" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="5" class="td-empty">No slots found.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    var modal     = document.getElementById('addSlotModal');
+    var openBtn   = document.getElementById('openModalBtn');
+    var closeBtn  = document.getElementById('modalCloseBtn');
+    var cancelBtn = document.getElementById('modalCancelBtn');
+
+    function openModal() {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    var avail = 0, occup = 0;
+    document.querySelectorAll('.slot-card').forEach(function (card) {
+      if (card.dataset.status === 'available') avail++;
+      else occup++;
+    });
+    document.getElementById('availCount').textContent = avail;
+    document.getElementById('occupCount').textContent = occup;
+
+  });
+</script>
+
+{% endblock %}

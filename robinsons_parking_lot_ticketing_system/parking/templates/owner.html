@@ -1,0 +1,48 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Robinson's Parking Lot{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'index.css' %}">
+{% endblock %}
+
+{% block content %}
+<nav>
+        <div class="logo">
+            <img src="{% static '/images/logo.png' %}" alt="logo" class="logo-img">
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="{% url 'owner' %}" class="active">Home</a></li>
+            <li><a href="{% url 'owner_vehicle_register' %}">My Vehicle</a>
+            <li><a href="{% url 'owner_parking_slots' %}">Parking Slots</a>
+            <li><a href="{% url 'owner_my_ticket' %}">My Parking Tickets</a>
+
+
+        </ul>
+
+        <div class="nav-actions">
+            {% if owner %}
+                <a href="#">{{ owner.first_name }}</a>
+                <a href="{% url 'owner_logout' %}" class="btn-signup">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'owner_register' %}" class="btn-signup">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-left">
+            <h1>Parking Lot Ticketing System</h1>
+            <p>
+                Welcome to Robinson's Parking Area and Enjoy Shopping!
+            </p>
+        </div>
+
+        <div class="hero-right">
+            <img src="{% static '/images/car.jpg' %}" alt="Car image" class="hero-car">
+        </div>
+    </section>
+{% endblock %}

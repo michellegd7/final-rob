@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: #f4f4f4;
+  font-family: 'Lato', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 2.8rem 2.4rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.card-header {
+  text-align: center;
+  margin-bottom: 1.6rem;
+}
+
+.logo-img {
+  height: 70px;
+  width: auto;
+  display: block;
+  margin: 0 auto 1rem;
+  object-fit: contain;
+}
+
+.card-header h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 0.3rem;
+}
+
+.card-header p {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.role-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.role-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 8px;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: #fff;
+  color: #bbb;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.role-btn.active {
+  border-color: #d0021b;
+  background: #d0021b;
+  color: #fff;
+}
+
+.role-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: block;
+}
+
+.role-selected {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #888;
+  margin-bottom: 1.4rem;
+  padding: 8px 12px;
+  background: #fff8f8;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+}
+
+.role-selected strong {
+  color: #d0021b;
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 1.1rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #444;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.field input {
+  width: 100%;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.92rem;
+  color: #111;
+  outline: none;
+  background: #fafafa;
+}
+
+.field input:focus {
+  border-color: #d0021b;
+  background: #fff;
+}
+
+.field input::placeholder { color: #bbb; }
+
+.field textarea {
+  width: 100%;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.92rem;
+  color: #111;
+  outline: none;
+  background: #fafafa;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field textarea:focus { border-color: #d0021b; background: #fff; }
+.field textarea::placeholder { color: #bbb; }
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.error-msg {
+  color: #d0021b;
+  font-size: 0.82rem;
+  margin-bottom: 0.8rem;
+  background: #fff0f0;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.6rem 0.9rem;
+}
+
+.btn-login {
+  width: 100%;
+  background: #d0021b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.85rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+
+.divider {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #bbb;
+  margin: 1.2rem 0;
+}
+
+.btn-register {
+  display: block;
+  width: 100%;
+  text-align: center;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 0.8rem;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+  text-decoration: none;
+}

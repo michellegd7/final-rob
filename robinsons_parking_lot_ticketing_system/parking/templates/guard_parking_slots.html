@@ -1,0 +1,290 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Parking Slots — Guard{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'guard_parking_slots.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="{% static '/images/logo.png' %}" alt="logo">
+      <div class="logo-text">Guard Portal
+        <span>Robinson's Parking</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'guard_parking_slots' %}" class="nav-item active">Parking Slots</a>
+      <a href="{% url 'guard_parking_ticket' %}" class="nav-item">Parking Ticket</a>
+      <a href="{% url 'guard_logout' %}" class="nav-item">Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="guard-profile">
+        <div>
+          <div class="guard-name">{{ guard.first_name }} {{ guard.last_name }}</div>
+          <div class="guard-role">Security Guard</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2>Parking Slots</h2>
+        <p>Monitor and manage real-time slot availability.</p>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <div class="stats-grid">
+        <div class="stat-card"><div><div class="stat-num">{{ slots|length }}</div><div class="stat-lbl">Total Slots</div></div></div>
+        <div class="stat-card"><div><div class="stat-num" id="availCount">0</div><div class="stat-lbl">Available</div></div></div>
+        <div class="stat-card"><div><div class="stat-num" id="occupCount">0</div><div class="stat-lbl">Occupied</div></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div><div class="panel-title">Slot Overview</div></div>
+        </div>
+        <div class="section-label">Level B1 — Ground Floor</div>
+        <div class="slots-grid">
+          {% for slot in slots %}
+          <div class="slot-card {{ slot.slot_status }}"
+               data-id="{{ slot.id }}"
+               data-number="{{ slot.slot_number }}"
+               data-type="{{ slot.slot_type }}"
+               data-status="{{ slot.slot_status }}"
+               {% if slot.active_ticket %}
+               data-ticket-id="{{ slot.active_ticket.id }}"
+               data-plate="{{ slot.active_ticket.vehicle.plate_number }}"
+               data-vehicle-type="{{ slot.active_ticket.vehicle.vehicle_type }}"
+               data-entry="{{ slot.active_ticket.entry_time|date:'M d, Y H:i' }}"
+               {% endif %}>
+            <div class="slot-badge"><span class="badge-dot"></span>{{ slot.slot_status|capfirst }}</div>
+            <div class="slot-label">{{ slot.slot_number }}</div>
+            <div class="slot-type">{{ slot.slot_type }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+
+    <div id="assignPanel">
+      <div class="modal-header">
+        <h2>Assign Slot</h2>
+        <button class="modal-close" id="modalClose">&#x2715;</button>
+      </div>
+      <div class="modal-spot-info">
+        <div class="modal-spot-label" id="modalSlotLabel">A1</div>
+        <div class="modal-spot-meta">
+          <strong id="modalSlotType">Standard</strong>
+          <span>Level B1 · Ground Floor</span>
+        </div>
+      </div>
+      <form id="slotForm">
+        {% csrf_token %}
+        <input type="hidden" id="slotIdInput" />
+
+        <!-- Owner dropdown -->
+        <div class="form-group">
+          <label>Owner</label>
+          <select id="ownerSelect" required>
+            <option value="" disabled selected>&#8212; Select an owner &#8212;</option>
+            {% for o in owners %}
+            <option value="{{ o.id }}">{{ o.first_name }} {{ o.last_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Plate Number</label>
+          <input type="text" id="plateNumber" placeholder="e.g. ABC 1234" required />
+        </div>
+        <div class="form-group">
+          <label>Vehicle Type</label>
+          <select id="vehicleType">
+            <option value="Car">Car</option>
+            <option value="Motorcycle">Motorcycle</option>
+            <option value="Van">Van</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Start Time</label>
+          <input type="datetime-local" id="startTime" required />
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <input type="datetime-local" id="endTime" required />
+        </div>
+        <div id="slotError" style="color:red;font-size:0.82rem;margin-bottom:0.5rem;display:none;"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel-modal" id="modalCancel">Cancel</button>
+          <button type="submit" class="btn-confirm" id="modalConfirm">Confirm Slot</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="occupiedPanel" style="display:none;">
+      <div class="modal-header">
+        <h2>Occupied Slot</h2>
+        <button class="modal-close" id="modalClose2">&#x2715;</button>
+      </div>
+      <div class="modal-spot-info">
+        <div class="modal-spot-label" id="infoSlotLabel">A1</div>
+        <div class="modal-spot-meta">
+          <strong id="infoSlotType">Standard</strong>
+          <span>Level B1 · Ground Floor</span>
+        </div>
+      </div>
+      <div class="modal-info-rows">
+        <div class="modal-info-row">
+          <span class="info-label">Plate Number</span>
+          <span class="info-value" id="infoPlate">&#8212;</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="info-label">Vehicle Type</span>
+          <span class="info-value" id="infoVehicleType">&#8212;</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="info-label">Check In</span>
+          <span class="info-value" id="infoEntry">&#8212;</span>
+        </div>
+        <div class="modal-info-row">
+          <span class="info-label">Status</span>
+          <span class="info-value status-occupied-badge">Occupied</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel-modal" id="occupiedClose">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toLocalDatetimeString(date) {
+    const y  = date.getFullYear();
+    const mo = String(date.getMonth() + 1).padStart(2, '0');
+    const d  = String(date.getDate()).padStart(2, '0');
+    const h  = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    return `${y}-${mo}-${d}T${h}:${mi}`;
+  }
+
+  let avail = 0, occup = 0;
+  document.querySelectorAll('.slot-card').forEach(card => {
+    const s = card.dataset.status;
+    if (s === 'available')     avail++;
+    else if (s === 'occupied') occup++;
+  });
+  document.getElementById('availCount').textContent = avail;
+  document.getElementById('occupCount').textContent = occup;
+
+  document.querySelectorAll('.slot-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const status = card.dataset.status;
+
+      if (status === 'available') {
+        document.getElementById('assignPanel').style.display   = 'block';
+        document.getElementById('occupiedPanel').style.display = 'none';
+
+        document.getElementById('modalSlotLabel').textContent = card.dataset.number;
+        document.getElementById('modalSlotType').textContent  = card.dataset.type;
+        document.getElementById('slotIdInput').value          = card.dataset.id;
+        document.getElementById('vehicleType').value =
+          card.dataset.type === 'Motorcycle' ? 'Motorcycle' :
+          card.dataset.type === 'Van'        ? 'Van' : 'Car';
+
+        document.getElementById('ownerSelect').value       = '';
+        document.getElementById('plateNumber').value       = '';
+        document.getElementById('slotError').style.display = 'none';
+        const now = new Date(), later = new Date(now.getTime() + 3600000);
+        document.getElementById('startTime').value = toLocalDatetimeString(now);
+        document.getElementById('endTime').value   = toLocalDatetimeString(later);
+
+      } else if (status === 'occupied') {
+        document.getElementById('assignPanel').style.display   = 'none';
+        document.getElementById('occupiedPanel').style.display = 'block';
+
+        document.getElementById('infoSlotLabel').textContent   = card.dataset.number;
+        document.getElementById('infoSlotType').textContent    = card.dataset.type;
+        document.getElementById('infoPlate').textContent       = card.dataset.plate       || '&#8212;';
+        document.getElementById('infoVehicleType').textContent = card.dataset.vehicleType || '&#8212;';
+        document.getElementById('infoEntry').textContent       = card.dataset.entry        || '&#8212;';
+      }
+
+      document.getElementById('modalOverlay').classList.add('open');
+    });
+  });
+
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalClose2').addEventListener('click', closeModal);
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('occupiedClose').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  document.getElementById('slotForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const errEl   = document.getElementById('slotError');
+    const ownerSel = document.getElementById('ownerSelect');
+
+    if (!ownerSel.value) {
+      errEl.textContent   = 'Please select an owner.';
+      errEl.style.display = 'block';
+      ownerSel.focus();
+      return;
+    }
+
+    const btn = document.getElementById('modalConfirm');
+    btn.disabled    = true;
+    btn.textContent = 'Processing...';
+
+    const payload = {
+      slot_id:      document.getElementById('slotIdInput').value,
+      owner_id:     ownerSel.value,
+      plate_number: document.getElementById('plateNumber').value,
+      vehicle_type: document.getElementById('vehicleType').value,
+      start_time:   document.getElementById('startTime').value,
+      end_time:     document.getElementById('endTime').value,
+    };
+
+    try {
+      const res  = await fetch("{% url 'guard_confirm_slot' %}", {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body:    JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const ownerName = ownerSel.options[ownerSel.selectedIndex].text;
+        alert('Slot assigned! Ticket created for ' + ownerName + '.');
+        window.location.reload();
+      } else {
+        errEl.textContent   = data.error || 'Failed to assign slot.';
+        errEl.style.display = 'block';
+        btn.disabled    = false;
+        btn.textContent = 'Confirm Slot';
+      }
+    } catch {
+      errEl.textContent   = 'Network error. Please try again.';
+      errEl.style.display = 'block';
+      btn.disabled    = false;
+      btn.textContent = 'Confirm Slot';
+    }
+  });
+</script>
+{% endblock %}

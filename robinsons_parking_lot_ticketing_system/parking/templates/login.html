@@ -1,0 +1,97 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Login — Robinson's Parking{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'login_register.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+      <img src="{% static 'images/logo.png' %}" alt="Robinson's Parking" class="logo-img" />
+      <h1>Robinson's Parking Lot</h1>
+      <p>Sign in to your account</p>
+    </div>
+
+    <!-- ROLE SELECTOR -->
+    <div class="role-tabs">
+      <button type="button" class="role-btn active" data-role="owner">
+        <span class="role-label">Owner</span>
+      </button>
+      <button type="button" class="role-btn" data-role="guard">
+        <span class="role-label">Guard</span>
+      </button>
+      <button type="button" class="role-btn" data-role="admin">
+        <span class="role-label">Admin</span>
+      </button>
+    </div>
+
+    <div class="role-selected">
+      Signing in as: <strong id="roleDisplay">Owner</strong>
+    </div>
+
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      <input type="hidden" name="role" id="selectedRole" value="owner" />
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               placeholder="Enter your username"
+               required autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               placeholder="Enter your password"
+               required autocomplete="current-password" />
+      </div>
+
+      {% if error %}
+        <p class="error-msg">{{ error }}</p>
+      {% endif %}
+
+      <button type="submit" class="btn-login">Sign In</button>
+    </form>
+
+    <div class="divider">-------------------------------------------------------------------</div>
+    <a href="{% url 'owner_register' %}" class="btn-register" id="registerBtn">Create an Account</a>
+  </div>
+
+  <script>
+    const roleBtns    = document.querySelectorAll('.role-btn');
+    const roleInput   = document.getElementById('selectedRole');
+    const roleDisplay = document.getElementById('roleDisplay');
+    const registerBtn = document.getElementById('registerBtn');
+
+    const registerUrls = {
+      owner: "{% url 'owner_register' %}",
+      guard: "{% url 'guard_register' %}",
+      admin: null,   // admin accounts are created via Django admin panel
+    };
+
+    function updateRole(btn) {
+      roleBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const role = btn.dataset.role;
+      roleInput.value = role;
+      roleDisplay.textContent = btn.querySelector('.role-label').textContent;
+
+      const url = registerUrls[role];
+      if (url) {
+        registerBtn.href = url;
+        registerBtn.style.display = 'block';
+      } else {
+        registerBtn.style.display = 'none';
+      }
+    }
+
+    roleBtns.forEach(btn => {
+      btn.addEventListener('click', () => updateRole(btn));
+    });
+  </script>
+{% endblock %}

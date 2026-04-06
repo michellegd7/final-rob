@@ -1,0 +1,130 @@
+/* ── Order Summary ── */
+.order-summary {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid #e5e5e5;
+}
+
+.order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ececec;
+}
+
+.order-row:last-child {
+  border-bottom: none;
+}
+
+.order-row span {
+  font-size: 0.82rem;
+  color: #888;
+}
+
+.order-row strong {
+  font-size: 0.88rem;
+  color: #111;
+  font-weight: 600;
+}
+
+.total-row {
+  padding-top: 0.7rem !important;
+  border-top: 1px dashed #ddd !important;
+  border-bottom: none !important;
+  margin-top: 0.3rem;
+}
+
+.total-row span {
+  font-size: 0.85rem !important;
+  color: #555 !important;
+  font-weight: 600 !important;
+}
+
+.total-row strong {
+  font-size: 1.2rem !important;
+  color: #d0021b !important;
+  font-weight: 700 !important;
+}
+
+.pay-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.pay-tab {
+  flex: 1;
+  padding: 0.65rem;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+}
+
+.pay-tab.active {
+  border-color: #d0021b;
+  background: #fff0f1;
+  color: #d0021b;
+}
+
+.pay-note {
+  font-size: 0.82rem;
+  color: #666;
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.9rem;
+  background: #f9f9f9;
+  border-radius: 7px;
+  line-height: 1.5;
+}
+
+/* ── PayPal container ── */
+#paypal-button-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ── Error msg ── */
+.error-msg {
+  font-size: 0.8rem;
+  color: #d0021b;
+  background: #fff0f1;
+  border: 1px solid #fca5a5;
+  border-radius: 7px;
+  padding: 0.5rem 0.85rem;
+  margin-top: 0.6rem;
+}
+
+.success-panel {
+  text-align: center;
+  padding: 2rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.success-icon {
+  font-size: 2.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.success-panel h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.success-panel p {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.5;
+}

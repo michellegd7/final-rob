@@ -1,0 +1,63 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Guard Registration — Robinson's Parking{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'guard_login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page">
+    <div class="card">
+ 
+      <img src="{% static '/images/logo.png' %}" alt="logo" class="logo-img">
+      <h1>Robinson's Parking</h1>
+      <p class="subtitle">Guard Registration</p>
+ 
+      <form method="POST" action="{% url 'guard_register' %}">
+        {% csrf_token %}
+ 
+        <div class="field">
+          <label for="first_name">First Name</label>
+          <input id="first_name" name="first_name" type="text" placeholder="Enter first name" required/>
+        </div>
+ 
+        <div class="field">
+          <label for="last_name">Last Name</label>
+          <input id="last_name" name="last_name" type="text" placeholder="Enter last name" required/>
+        </div>
+ 
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" placeholder="Choose a username" required autocomplete="username"/>
+        </div>
+ 
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Choose a password" required autocomplete="new-password"/>
+        </div>
+ 
+        <div class="field">
+          <label for="phone_number">Phone Number</label>
+          <input id="phone_number" name="phone_number" type="text" placeholder="e.g. 09171234567" required/>
+        </div>
+ 
+        <div class="field">
+          <label for="address">Address</label>
+          <input id="address" name="address" type="text" placeholder="Enter address"/>
+        </div>
+ 
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+ 
+        <button type="submit">Register</button>
+      </form>
+ 
+      <p class="register-link">Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+ 
+      <p class="copy">Robinson's Parking Lot &copy; 2025</p>
+    </div>
+  </div>
+{% endblock %}

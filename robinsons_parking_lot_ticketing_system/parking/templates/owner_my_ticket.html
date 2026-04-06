@@ -1,0 +1,252 @@
+{% extends "master.html" %}
+{% load static tz %}
+
+{% block title %}My Parking Tickets{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'owner_my_ticket.css' %}">
+{% endblock %}
+
+{% block content %}
+<nav>
+    <div class="logo">
+      <img src="{% static '/images/logo.png' %}" alt="logo" class="logo-img">
+    </div>
+    <ul class="nav-links">
+      <li><a href="{% url 'owner' %}">Home</a></li>
+      <li><a href="{% url 'owner_vehicle_register' %}">My Vehicle</a></li>
+      <li><a href="{% url 'owner_parking_slots' %}">Parking Slots</a></li>
+      <li><a href="{% url 'owner_my_ticket' %}" class="active">My Parking Tickets</a></li>
+    </ul>
+    <div class="nav-actions">
+      {% if owner %}
+        <a href="#">{{ owner.first_name }}</a>
+        <a href="{% url 'owner_logout' %}" class="btn-logout">Logout</a>
+      {% else %}
+        <a href="{% url 'owner_login' %}">Login</a>
+        <a href="{% url 'owner_register' %}" class="btn-signup">Sign Up</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>My Tickets</h1>
+    <p>View and manage all your parking tickets.</p>
+  </div>
+
+  <div class="tickets-section">
+    <div class="section-label">Parking Records</div>
+    <div class="table-wrapper">
+      <table class="tickets-table">
+        <thead>
+          <tr>
+            <th>Ticket #</th>
+            <th>Slot</th>
+            <th>Vehicle Type</th>
+            <th>Plate No.</th>
+            <th>Entry Time</th>
+            <th>Exit Time</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in tickets %}
+          <tr>
+            <td class="ticket-id">TKT-{{ t.id|stringformat:"04d" }}</td>
+            <td><strong>{{ t.slot.slot_number }}</strong></td>
+            <td>{{ t.vehicle.vehicle_type }}</td>
+            <td class="plate">{{ t.vehicle.plate_number }}</td>
+            <td>{{ t.entry_time|date:"M d, Y H:i" }}</td>
+            <td>{% if t.exit_time %}{{ t.exit_time|date:"M d, Y H:i" }}{% else %}—{% endif %}</td>
+            <td>
+              {% if t.status == 'active' %}
+                <span class="status-badge badge-active">Active</span>
+              {% elif t.status == 'completed' %}
+                <span class="status-badge badge-completed">Completed</span>
+              {% else %}
+                <span class="status-badge badge-cancelled">Cancelled</span>
+              {% endif %}
+            </td>
+            <td class="action-btns">
+              <button class="btn-view"
+                data-id="{{ t.id }}"
+                data-slot="{{ t.slot.slot_number }}"
+                data-type="{{ t.vehicle.vehicle_type }}"
+                data-plate="{{ t.vehicle.plate_number }}"
+                data-entry="{{ t.entry_time|date:'M d, Y H:i' }}"
+                data-exit="{% if t.exit_time %}{{ t.exit_time|date:'M d, Y H:i' }}{% else %}—{% endif %}"
+                data-status="{{ t.status }}"
+              >View</button>
+              {% if t.status == 'active' %}
+              <button class="btn-edit"
+                data-id="{{ t.id }}"
+                data-plate="{{ t.vehicle.plate_number }}"
+                data-type="{{ t.vehicle.vehicle_type }}"
+                data-entry="{{ t.entry_time|localtime|date:'Y-m-d' }}T{{ t.entry_time|localtime|date:'H:i' }}"
+                data-exit="{% if t.exit_time %}{{ t.exit_time|localtime|date:'Y-m-d' }}T{{ t.exit_time|localtime|date:'H:i' }}{% endif %}"
+              >Edit</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8" style="text-align:center;padding:3rem;color:#888;">
+              No tickets yet.
+              <a href="{% url 'owner_parking_slots' %}" style="color:#d0021b;">Browse slots →</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- View Modal -->
+  <div class="modal-overlay" id="viewModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Ticket Details</h2>
+        <button class="modal-close" id="viewModalClose">✕</button>
+      </div>
+      <div class="ticket-card-preview">
+        <div class="ticket-preview-top">
+          <div class="ticket-number" id="previewTicketNo">TKT-0001</div>
+          <span class="status-badge" id="previewStatus">Active</span>
+        </div>
+        <div class="ticket-detail-grid">
+          <div class="ticket-detail-item">
+            <span class="detail-label">Slot</span>
+            <span class="detail-value" id="previewSlot">—</span>
+          </div>
+          <div class="ticket-detail-item">
+            <span class="detail-label">Vehicle Type</span>
+            <span class="detail-value" id="previewType">—</span>
+          </div>
+          <div class="ticket-detail-item">
+            <span class="detail-label">Plate No.</span>
+            <span class="detail-value" id="previewPlate">—</span>
+          </div>
+          <div class="ticket-detail-item">
+            <span class="detail-label">Entry Time</span>
+            <span class="detail-value" id="previewEntry">—</span>
+          </div>
+          <div class="ticket-detail-item">
+            <span class="detail-label">Exit Time</span>
+            <span class="detail-value" id="previewExit">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel-modal" id="viewModalCancel">Close</button>
+        <button class="btn-cancel-ticket" id="cancelTicketBtn" style="display:none;">Cancel Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="editModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Ticket</h2>
+        <button class="modal-close" id="editModalClose">✕</button>
+      </div>
+      <form method="POST" id="editForm">
+        {% csrf_token %}
+        <input type="hidden" name="ticket_id" id="editTicketId" />
+        <div class="form-group">
+          <label>Plate Number</label>
+          <input type="text" name="plate_number" id="editPlate" placeholder="e.g. ABC 1234" required />
+        </div>
+        <div class="form-group">
+          <label>Vehicle Type</label>
+          <select name="vehicle_type" id="editVehicleType">
+            <option value="Car">Car</option>
+            <option value="Motorcycle">Motorcycle</option>
+            <option value="Van">Van</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Entry Time</label>
+          <input type="datetime-local" name="entry_time" id="editEntry" required />
+        </div>
+        <div class="form-group">
+          <label>Exit Time</label>
+          <input type="datetime-local" name="exit_time" id="editExit" />
+          <small style="color:#888;font-size:0.75rem;">Leave blank if still active.</small>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel-modal" id="editModalCancel">Cancel</button>
+          <button type="submit" class="btn-save">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <form method="POST" id="cancelForm" style="display:none;">
+    {% csrf_token %}
+  </form>
+
+  <script>
+    const STATUS_CLASS = { active: 'badge-active', completed: 'badge-completed', cancelled: 'badge-cancelled' };
+    let currentTicketId = null;
+
+    document.querySelectorAll('.btn-view').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = btn.dataset;
+        currentTicketId = d.id;
+        document.getElementById('previewTicketNo').textContent = 'TKT-' + String(d.id).padStart(4, '0');
+        document.getElementById('previewStatus').textContent   = d.status.charAt(0).toUpperCase() + d.status.slice(1);
+        document.getElementById('previewStatus').className     = 'status-badge ' + (STATUS_CLASS[d.status] || '');
+        document.getElementById('previewSlot').textContent     = d.slot;
+        document.getElementById('previewType').textContent     = d.type;
+        document.getElementById('previewPlate').textContent    = d.plate;
+        document.getElementById('previewEntry').textContent    = d.entry;
+        document.getElementById('previewExit').textContent     = d.exit;
+        document.getElementById('cancelTicketBtn').style.display = d.status === 'active' ? 'block' : 'none';
+        document.getElementById('viewModalOverlay').classList.add('open');
+      });
+    });
+
+    function closeViewModal() {
+      document.getElementById('viewModalOverlay').classList.remove('open');
+      currentTicketId = null;
+    }
+
+    document.getElementById('viewModalClose').addEventListener('click', closeViewModal);
+    document.getElementById('viewModalCancel').addEventListener('click', closeViewModal);
+    document.getElementById('viewModalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('viewModalOverlay')) closeViewModal();
+    });
+
+    document.getElementById('cancelTicketBtn').addEventListener('click', () => {
+      if (!currentTicketId) return;
+      if (!confirm('Cancel this ticket? The slot will be freed.')) return;
+      const form = document.getElementById('cancelForm');
+      form.action = `/owner_cancel_ticket/${currentTicketId}/`;
+      form.submit();
+    });
+
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = btn.dataset;
+        document.getElementById('editTicketId').value    = d.id;
+        document.getElementById('editPlate').value       = d.plate;
+        document.getElementById('editVehicleType').value = d.type;
+        document.getElementById('editEntry').value       = d.entry;
+        document.getElementById('editExit').value        = d.exit || '';
+        document.getElementById('editForm').action = `/owner_edit_ticket/${d.id}/`;
+        document.getElementById('editModalOverlay').classList.add('open');
+      });
+    });
+
+    function closeEditModal() {
+      document.getElementById('editModalOverlay').classList.remove('open');
+    }
+
+    document.getElementById('editModalClose').addEventListener('click', closeEditModal);
+    document.getElementById('editModalCancel').addEventListener('click', closeEditModal);
+    document.getElementById('editModalOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('editModalOverlay')) closeEditModal();
+    });
+  </script>
+{% endblock %}

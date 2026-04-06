@@ -1,0 +1,427 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+ 
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 6vw;
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    border-bottom: 3px solid rgba(0,0,0,0.04);
+}
+ 
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2.5rem;
+    font-family: 'Times New Roman', Times, serif;
+}
+ 
+.nav-links a {
+    text-decoration: none;
+    font-size: 1rem;
+    color: black;
+}
+ 
+.nav-links a.active {
+    font-weight: 700;
+    border-bottom: 2px solid rgb(243, 5, 5);
+    padding-bottom: 2px;
+}
+ 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-family: 'Times New Roman', Times, serif;
+}
+ 
+.nav-actions a {
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #111;
+}
+ 
+
+.btn-logout {
+    background: #d0021b;
+    color: #fff !important;
+    padding: 0.5rem 1.3rem;
+    border-radius: 8px;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    text-decoration: none;
+}
+
+ 
+.logo .logo-img {
+    height: 60px;
+    width: auto;
+    display: block;
+}
+ 
+.page-header {
+    padding: 2.8rem 6vw 2rem;
+}
+ 
+.page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 2.8rem;
+    color: rgb(240, 14, 14);
+    margin-bottom: 0.4rem;
+}
+ 
+.page-header p {
+    font-size: 1rem;
+    color: #444;
+}
+ 
+.tickets-section {
+    padding: 0 6vw 4rem;
+}
+ 
+.section-label {
+    font-size: 1.20rem;
+    font-weight: 700;
+    color: black;
+    margin: 2rem 0 1rem;
+}
+ 
+.table-wrapper {
+    overflow-x: auto;
+    border: 1.8px solid #000;
+    border-radius: 14px;
+}
+ 
+.tickets-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.88rem;
+}
+ 
+.tickets-table thead {
+    background: #f9f9f9;
+    border-bottom: 2px solid #000;
+}
+ 
+.tickets-table th {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #111;
+    white-space: nowrap;
+}
+ 
+.tickets-table td {
+    padding: 0.85rem 1rem;
+    color: #222;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(0,0,0,0.07);
+    white-space: nowrap;
+}
+ 
+.tickets-table tbody tr:last-child td {
+    border-bottom: none;
+}
+ 
+
+ 
+.ticket-id {
+    font-weight: 700;
+    color: rgb(180, 10, 10);
+    font-size: 0.82rem;
+}
+ 
+.plate {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+    font-size: 0.84rem;
+    letter-spacing: 0.05em;
+}
+ 
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+ 
+.badge-active {
+    background: rgb(183, 221, 183);
+    color: rgb(20, 100, 30);
+    border: 1px solid rgb(99, 181, 103);
+}
+ 
+.badge-completed {
+    background: rgba(200, 200, 200, 0.3);
+    color: #333;
+    border: 1px solid #aaa;
+}
+ 
+.badge-cancelled {
+    background: rgba(228, 135, 135, 0.2);
+    color: rgb(168, 33, 33);
+    border: 1px solid rgb(168, 33, 33);
+}
+ 
+.action-btns {
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+}
+ 
+.btn-view {
+    border: 1.5px solid black;
+    background: #fff;
+    border-radius: 50px;
+    padding: 0.3rem 0.9rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: black;
+
+}
+ 
+ 
+.btn-edit {
+    border: 1.5px solid #1d4ed8;
+    background: #fff;
+    border-radius: 50px;
+    padding: 0.3rem 0.9rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1d4ed8;
+    cursor: pointer;
+}
+ 
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 4rem 2rem;
+    color: #888;
+}
+ 
+.empty-state p {
+    font-size: 0.95rem;
+    font-family: 'Mulish', sans-serif;
+}
+ 
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,46,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+ 
+.modal-overlay.open {
+    display: flex;
+}
+ 
+.modal {
+    background: #fbfbfb;
+    border-radius: 16px;
+    padding: 2.2rem;
+    width: 100%;
+    max-width: 440px;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+ 
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+ 
+.modal-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: green;
+}
+ 
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: black;
+    cursor: pointer;
+}
+
+.ticket-card-preview {
+    border: 1.5px solid #ddd;
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.6rem;
+    background: #fff;
+}
+ 
+.ticket-preview-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px dashed #ccc;
+}
+ 
+.ticket-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgb(180, 10, 10);
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.04em;
+}
+ 
+.ticket-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem 1.5rem;
+}
+ 
+.ticket-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+ 
+.detail-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #888;
+}
+ 
+.detail-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+}
+ 
+.form-group {
+    margin-bottom: 1rem;
+}
+ 
+.form-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #555;
+    margin-bottom: 0.4rem;
+}
+ 
+.form-group input,
+.form-group select {
+    width: 100%;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.88rem;
+    color: #111;
+    background: #fff;
+    outline: none;
+}
+ 
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #1d4ed8;
+}
+ 
+.form-group input::placeholder {
+    color: #bbb;
+}
+ 
+.form-group small {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    color: #888;
+}
+ 
+.modal-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1.6rem;
+}
+ 
+.btn-cancel-modal {
+    border: 1.5px solid black;
+    background: #fff;
+    border-radius: 50px;
+    padding: 0.82rem 1.4rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: black;
+    cursor: pointer;
+}
+ 
+.btn-cancel-ticket {
+    flex: 1;
+    background: rgb(168, 33, 33);
+    color: #fff;
+    border: 1.5px solid rgb(168, 33, 33);
+    border-radius: 50px;
+    padding: 0.82rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+ 
+.btn-save {
+    flex: 1;
+    background: #1d4ed8;
+    color: #fff;
+    border: 1.5px solid #1d4ed8;
+    border-radius: 50px;
+    padding: 0.82rem;
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.btn-save:disabled {
+    background: #aaa;
+    border-color: #aaa;
+    cursor: not-allowed;
+}
+ 
+@media (max-width: 600px) {
+    nav { padding: 1rem 4vw; }
+    .nav-links { display: none; }
+    .tickets-section { padding: 0 4vw 3rem; }
+    .page-header { padding: 2rem 4vw 1.5rem; }
+    .ticket-detail-grid { grid-template-columns: 1fr; }
+    .action-btns { flex-direction: column; }
+}
+ 

@@ -1,0 +1,160 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Owners — Admin{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'admin_owners.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="{% static 'images/logo.png' %}" alt="logo">
+      <div class="logo-text">Admin Portal<span>Robinson's Parking</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'admin_dashboard' %}" class="nav-item">Dashboard</a>
+      <a href="{% url 'admin_owners' %}"    class="nav-item active">Owners</a>
+      <a href="{% url 'admin_guards' %}"    class="nav-item">Guards</a>
+      <a href="{% url 'admin_slots' %}"     class="nav-item">Parking Slots</a>
+      <a href="{% url 'admin_tickets' %}"   class="nav-item">Tickets</a>
+      <a href="{% url 'admin_logout' %}"    class="nav-item">Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="guard-profile">
+        <div>
+          <div class="guard-name">Administrator</div>
+          <div class="guard-role">System Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2>Owners</h2>
+        <p>Manage registered vehicle owners.</p>
+      </div>
+    </div>
+    <div class="page-content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ owners|length }}</div>
+            <div class="stat-lbl">Total Owners</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">All Owners</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Username</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Vehicles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in owners %}
+              <tr>
+                <td class="td-muted">{{ o.id }}</td>
+                <td>{{ o.first_name }}</td>
+                <td>{{ o.last_name }}</td>
+                <td class="td-muted">{{ o.username }}</td>
+                <td>{{ o.phone_number|default:"—" }}</td>
+                <td class="td-muted">{{ o.address|default:"—" }}</td>
+                <td>
+                  <button class="btn-view-vehicles"
+                    data-name="{{ o.first_name }} {{ o.last_name }}"
+                    data-username="{{ o.username }}"
+                    data-vehicles="{% for v in o.vehicles_data %}{{ v.type }}|{{ v.plate }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                  >View</button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="td-empty">No owners registered yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="vehicleModalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2 id="modalOwnerName">—</h2>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+
+    <div class="modal-label">Registered Vehicles</div>
+
+    <div id="vehicleList" class="vehicle-list"></div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-close" id="modalCancel">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.btn-view-vehicles').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const { name, username, vehicles } = btn.dataset;
+
+      document.getElementById('modalOwnerName').textContent = name;
+
+      const list = document.getElementById('vehicleList');
+      list.innerHTML = '';
+
+      if (!vehicles.trim()) {
+        list.innerHTML = '<div class="vehicle-empty">No vehicles registered.</div>';
+      } else {
+        vehicles.split(',').forEach(entry => {
+          const [type, plate] = entry.split('|');
+          const card = document.createElement('div');
+          card.className = 'vehicle-card';
+          card.innerHTML = `
+            <div class="vehicle-info">
+              <span class="vehicle-type">${type}</span>
+              <span class="vehicle-plate">${plate}</span>
+            </div>`;
+          list.appendChild(card);
+        });
+      }
+
+      document.getElementById('vehicleModalOverlay').classList.add('open');
+    });
+  });
+
+  function closeModal() {
+    document.getElementById('vehicleModalOverlay').classList.remove('open');
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('vehicleModalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('vehicleModalOverlay')) closeModal();
+  });
+</script>
+
+{% endblock %}

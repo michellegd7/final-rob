@@ -1,0 +1,180 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Admin Dashboard — Robinson's Parking{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'admin_dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="{% static 'images/logo.png' %}" alt="logo">
+      <div class="logo-text">Admin Portal<span>Robinson's Parking</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'admin_dashboard' %}" class="nav-item active">Dashboard</a>
+      <a href="{% url 'admin_owners' %}"    class="nav-item">Owners</a>
+      <a href="{% url 'admin_guards' %}"    class="nav-item">Guards</a>
+      <a href="{% url 'admin_slots' %}"     class="nav-item">Parking Slots</a>
+      <a href="{% url 'admin_tickets' %}"   class="nav-item">Tickets</a>
+      <a href="{% url 'admin_logout' %}"    class="nav-item">Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="guard-profile">
+        <div>
+          <div class="guard-name">Administrator</div>
+          <div class="guard-role">System Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Overview of parking operations and system activity.</p>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ total_slots }}</div>
+            <div class="stat-lbl">Total Slots</div>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div>
+            <div class="stat-num">{{ available_slots }}</div>
+            <div class="stat-lbl">Available</div>
+          </div>
+        </div>
+        <div class="stat-card red">
+          <div>
+            <div class="stat-num">{{ occupied_slots }}</div>
+            <div class="stat-lbl">Occupied</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ total_tickets }}</div>
+            <div class="stat-lbl">Total Tickets</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ total_owners }}</div>
+            <div class="stat-lbl">Owners</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-num">{{ total_guards }}</div>
+            <div class="stat-lbl">Guards</div>
+          </div>
+        </div>
+        <div class="stat-card green">
+          <div>
+            <div class="stat-num">₱{{ total_sales|floatformat:0 }}</div>
+            <div class="stat-lbl">Total Sales</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Recent Tickets</div>
+          <a href="{% url 'admin_tickets' %}" class="btn-view-all">View All →</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Ticket ID</th>
+                <th>Plate</th>
+                <th>Slot</th>
+                <th>Type</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in recent_tickets %}
+              <tr>
+                <td class="td-id">TKT-{{ t.id|stringformat:"06d" }}</td>
+                <td class="td-plate">{{ t.vehicle.plate_number }}</td>
+                <td>{{ t.slot.slot_number }}</td>
+                <td>{{ t.vehicle.vehicle_type }}</td>
+                <td class="td-muted">{{ t.entry_time|date:"M d, Y H:i" }}</td>
+                <td class="td-muted">{{ t.exit_time|date:"M d, Y H:i"|default:"—" }}</td>
+                <td>
+                  {% if t.status == 'active' %}
+                    <span class="badge badge-active">On Going</span>
+                  {% elif t.status == 'completed' %}
+                    <span class="badge badge-done">Done</span>
+                  {% else %}
+                    <span class="badge badge-cancelled">Cancelled</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="7" class="td-empty">No tickets yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="two-col">
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Guards</div>
+            <a href="{% url 'admin_guards' %}" class="btn-view-all">View All →</a>
+          </div>
+          <div class="user-list">
+            {% for g in guards %}
+            <div class="user-row">
+              <div class="user-info">
+                <div class="user-name">{{ g.first_name }} {{ g.last_name }}</div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="td-empty">No guards registered.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Owners</div>
+            <a href="{% url 'admin_owners' %}" class="btn-view-all">View All →</a>
+          </div>
+          <div class="user-list">
+            {% for o in owners %}
+            <div class="user-row">
+              <div class="user-info">
+                <div class="user-name">{{ o.first_name }} {{ o.last_name }}</div>
+              </div>
+            </div>
+            {% empty %}
+            <p class="td-empty">No owners registered.</p>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

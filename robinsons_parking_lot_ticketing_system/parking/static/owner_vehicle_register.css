@@ -1,0 +1,183 @@
+.register-section {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.vehicle-list-panel {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.8rem;
+}
+
+.vehicle-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.4rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.vehicle-list-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.vehicle-count {
+  background: #f4f4f4;
+  color: #888;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+}
+
+.vehicle-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1.4rem;
+  border-bottom: 1px solid #f4f4f4;
+}
+.vehicle-row:last-child { border-bottom: none; }
+
+.vehicle-details { flex: 1; }
+
+.vehicle-plate {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 0.05em;
+}
+
+.vehicle-id-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #aaa;
+  background: #f4f4f4;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  letter-spacing: 0.03em;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.vehicle-meta {
+  font-size: 0.78rem;
+  color: #888;
+  margin-top: 2px;
+}
+
+.vehicle-badge {
+  display: inline-block;
+  padding: 0.18rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-car        { background: #eff6ff; color: #2563eb; }
+.badge-motorcycle { background: #fef9c3; color: #854d0e; }
+.badge-van        { background: #f0fdf4; color: #16a34a; }
+
+.vehicle-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #aaa;
+  font-size: 0.88rem;
+}
+
+.register-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.register-card-header {
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.register-card-header h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.register-card-body { padding: 1.4rem; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.btn-register {
+  width: 100%;
+  padding: 0.85rem;
+  background: #d0021b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 0.3rem;
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.form-success {
+  font-size: 0.85rem;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.form-error {
+  font-size: 0.8rem;
+  color: #d0021b;
+  background: #fff0f1;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 0.5rem 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.btn-logout {
+  background: #d0021b;
+  color: #fff !important;
+  padding: 0.5rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 500 !important;
+  font-size: 1rem !important;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .register-section { padding: 0 1rem 2rem; }
+  .form-row { grid-template-columns: 1fr; }
+}

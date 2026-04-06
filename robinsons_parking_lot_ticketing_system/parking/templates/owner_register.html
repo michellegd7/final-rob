@@ -1,0 +1,64 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Create Account — Robinson's Parking{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'login_register.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+
+    <div class="card-header">
+      <img src="{% static 'images/logo.png' %}" alt="Robinson's Parking" class="logo-img" />
+      <h1>Robinson's Parking</h1>
+      <p>Create your account</p>
+    </div>
+
+    <form method="POST" action="">
+      {% csrf_token %}
+
+      <div class="name-row">
+        <div class="field">
+          <label for="first_name">First Name</label>
+          <input type="text" id="first_name" name="first_name" placeholder="Juan" required />
+        </div>
+        <div class="field">
+          <label for="last_name">Last Name</label>
+          <input type="text" id="last_name" name="last_name" placeholder="Dela Cruz" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter a username" required autocomplete="username" />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter a password" required autocomplete="new-password" />
+      </div>
+
+      <div class="field">
+        <label for="phone_number">Phone Number</label>
+        <input type="text" id="phone_number" name="phone_number" placeholder="e.g. 09XX XXX XXXX" required />
+      </div>
+
+      <div class="field">
+        <label for="address">Address</label>
+        <textarea id="address" name="address" placeholder="Enter your address" required></textarea>
+      </div>
+
+      {% if error %}
+        <p style="color: red; font-size: 0.85rem; margin-bottom: 0.8rem;">{{ error }}</p>
+      {% endif %}
+      <button type="submit" class="btn-login">Create Account</button>
+    </form>
+
+    <div class="divider">already have an account?</div>
+
+    <a href="{% url 'login' %}" class="btn-register">Sign In</a>
+
+  </div>
+{% endblock %}

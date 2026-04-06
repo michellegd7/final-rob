@@ -1,0 +1,327 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Parking Slots{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'owner_parking_slots.css' %}">
+  <link rel="stylesheet" href="{% static 'owner_parking_slots_payment.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<nav>
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="logo" class="logo-img">
+  </div>
+  <ul class="nav-links">
+    <li><a href="{% url 'owner' %}">Home</a></li>
+    <li><a href="{% url 'owner_vehicle_register' %}">My Vehicle</a></li>
+    <li><a href="{% url 'owner_parking_slots' %}" class="active">Parking Slots</a></li>
+    <li><a href="{% url 'owner_my_ticket' %}">My Parking Tickets</a></li>
+  </ul>
+  <div class="nav-actions">
+    {% if owner %}
+      <a href="#">{{ owner.first_name }}</a>
+      <a href="{% url 'owner_logout' %}" class="btn-logout">Logout</a>
+    {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'owner_register' %}" class="btn-signup">Sign Up</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="page-header">
+  <h1>Parking Slots</h1>
+  <p>Browse and reserve available parking slots in real time.</p>
+</div>
+
+{% if error %}
+<div class="error-banner">{{ error }}</div>
+{% endif %}
+
+<div class="slots-section">
+  <div class="slots-grid">
+    {% for slot in slots %}
+    <div class="slot-card {{ slot.slot_status }}"
+         data-id="{{ slot.id }}"
+         data-type="{{ slot.slot_type }}"
+         data-number="{{ slot.slot_number }}"
+         data-status="{{ slot.slot_status }}"
+         {% if slot.active_ticket %}
+         data-plate="{{ slot.active_ticket.vehicle.plate_number }}"
+         data-vehicle-type="{{ slot.active_ticket.vehicle.vehicle_type }}"
+         data-entry="{{ slot.active_ticket.entry_time|date:'M d, Y H:i' }}"
+         data-exit="{{ slot.active_ticket.exit_time|date:'M d, Y H:i'|default:'Not set' }}"
+         data-fee="₱{{ slot.active_ticket.computed_fee }}"
+         data-pay-method="{{ slot.active_ticket.payment_method|default:'—' }}"
+         data-pay-ref="{{ slot.active_ticket.payment_ref|default:'—' }}"
+         data-pay-status="{{ slot.active_ticket.payment_status|default:'pending' }}"
+         {% endif %}>
+      <div class="slot-badge"><span class="badge-dot"></span>{{ slot.slot_status|capfirst }}</div>
+      <div class="slot-label">{{ slot.slot_number }}</div>
+      <div class="slot-type">{{ slot.slot_type }}</div>
+    </div>
+    {% empty %}
+    <p style="color:#888;padding:2rem;">No slots configured yet.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div id="step1Panel">
+      <div class="modal-header">
+        <h2 id="modalTitle">Reserve Slot</h2>
+        <button type="button" class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-spot-info">
+        <div class="modal-spot-label" id="modalSlotLabel">—</div>
+        <div class="modal-spot-meta">
+          <strong id="modalSlotType">—</strong>
+        </div>
+      </div>
+
+      <div id="viewPanel">
+        <div class="modal-info-rows">
+          <div class="modal-info-row"><span class="info-label">Slot Number</span>    <span class="info-value" id="infoNumber">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Slot Type</span>      <span class="info-value" id="infoType">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Plate Number</span>   <span class="info-value" id="infoPlate">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Vehicle Type</span>   <span class="info-value" id="infoVehicleType">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Check In</span>       <span class="info-value" id="infoEntry">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Expected Exit</span>  <span class="info-value info-exit" id="infoExit">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Status</span>         <span class="info-value" id="infoStatus">—</span></div>
+          <div class="info-section-label" id="payInfoLabel">Payment</div>
+          <div class="modal-info-row"><span class="info-label">Total Fee</span>      <span class="info-value info-fee" id="infoFee">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Payment Method</span> <span class="info-value" id="infoPayMethod">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Reference</span>      <span class="info-value" id="infoPayRef">—</span></div>
+          <div class="modal-info-row"><span class="info-label">Payment Status</span> <span class="info-value" id="infoPayStatus">—</span></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-close-modal" id="viewPanelClose">Close</button>
+        </div>
+      </div>
+
+      <div id="reservePanel" style="display:none;">
+        <div class="rate-notice">Rate: <strong id="rateDisplay">—</strong></div>
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="e.g. Juan Dela Cruz" />
+        </div>
+        <div class="form-group">
+          <label>Plate Number</label>
+          <input type="text" id="plateNumber" placeholder="e.g. ABC 1234" />
+        </div>
+        <div class="form-group">
+          <label>Entry Time</label>
+          <input type="datetime-local" id="startTime" />
+        </div>
+        <div class="form-group">
+          <label>Exit Time</label>
+          <input type="datetime-local" id="endTime" />
+        </div>
+        <div id="reserveError" class="error-msg" style="display:none;"></div>
+        <div class="fee-preview" id="feePreview" style="display:none;">
+          <span>Total Fee</span><strong id="feeAmount">₱0.00</strong>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-close-modal" id="modalCancel">Cancel</button>
+          <button type="button" class="btn-confirm" id="proceedToPayment">Proceed to Payment →</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step2Panel" style="display:none;">
+      <div class="modal-header">
+        <h2>Payment</h2>
+        <button type="button" class="modal-close" id="payClose">✕</button>
+      </div>
+ 
+      <div class="order-summary">
+        <div class="order-row"><span>Slot</span>          <strong id="paySlot">—</strong></div>
+        <div class="order-row"><span>Vehicle Type</span>  <strong id="payVehicle">—</strong></div>
+        <div class="order-row"><span>Plate</span>         <strong id="payPlate">—</strong></div>
+        <div class="order-row"><span>Entry</span>         <strong id="payEntry">—</strong></div>
+        <div class="order-row"><span>Expected Exit</span> <strong id="payExit">—</strong></div>
+        <div class="order-row total-row"><span>Total Fee</span><strong id="payTotal">₱0.00</strong></div>
+      </div>
+ 
+      <div class="pay-tabs">
+        <button type="button" class="pay-tab active" data-method="paypal">💳 PayPal</button>
+        <button type="button" class="pay-tab" data-method="cod">💵 Pay on Arrival</button>
+      </div>
+ 
+      <div class="pay-method-panel" id="method-paypal">
+        <p class="pay-note">Complete payment securely via PayPal.</p>
+        <div id="paypal-button-container"></div>
+        <div id="paypalError" class="error-msg" style="display:none;"></div>
+      </div>
+ 
+      <div class="pay-method-panel" id="method-cod" style="display:none;">
+        <p class="pay-note">Your slot will be reserved. Pay the fee when you arrive.</p>
+        <div class="modal-actions" style="margin-top:1rem;">
+          <button type="button" class="btn-close-modal" id="codBack">← Back</button>
+          <button type="button" class="btn-confirm" id="codConfirm">Confirm Reservation</button>
+        </div>
+      </div>
+    </div>
+ 
+    <div id="step3Panel" style="display:none;">
+      <div class="success-panel">
+        <div class="success-icon">✅</div>
+        <h2>Reservation Confirmed!</h2>
+        <p id="successMsg">Your parking slot has been reserved.</p>
+        <button type="button" class="btn-confirm" id="successClose" style="margin-top:1.5rem;width:100%;">Done</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<form method="POST" action="{% url 'owner_reserve_slot' %}" id="hiddenForm" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="slot_id"        id="f_slot_id" />
+  <input type="hidden" name="plate_number"   id="f_plate" />
+  <input type="hidden" name="vehicle_type"   id="f_vtype" />
+  <input type="hidden" name="start_time"     id="f_start" />
+  <input type="hidden" name="end_time"       id="f_end" />
+  <input type="hidden" name="payment_method" id="f_method" />
+  <input type="hidden" name="payment_ref"    id="f_ref" />
+</form>
+
+<script src="https://www.paypal.com/sdk/js?client-id=AXpsELqh37kgTeqp8pWDiRIpbApaMTZfu9hiAufrF39AI8ah3tlm3gpvczzucYFvtvA2xJFuFOc4qEst&currency=PHP"></script>
+<script>
+  const RATES = { Car: 100, Motorcycle: 50, Van: 150 };
+  const METHOD_LABELS = { paypal: 'PayPal', pay_on_arrival: 'Pay on Arrival' };
+  const $ = id => document.getElementById(id);
+  const peso = n  => '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2 });
+  const toLocal = d  => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+  const showStep = n  => [1, 2, 3].forEach(i => $('step' + i + 'Panel').style.display = i === n ? 'block' : 'none');
+  const getRate = v  => RATES[v] || 100;
+  const typeMap = { Motorcycle: 'Motorcycle', Van: 'Van', Car: 'Car' };
+
+  const slotIdInput = Object.assign(document.createElement('input'), { type: 'hidden', id: 'slotIdInput' });
+  document.body.appendChild(slotIdInput);
+
+  let ppRendered = false;
+  let currentVehicleType = 'Car';
+
+  function updateFee() {
+    $('feeAmount').textContent    = peso(getRate(currentVehicleType));
+    $('rateDisplay').textContent  = peso(getRate(currentVehicleType));
+    $('feePreview').style.display = 'flex';
+  }
+
+  function submitForm(method, ref) {
+    $('f_slot_id').value = slotIdInput.value;
+    $('f_plate').value   = $('plateNumber').value;
+    $('f_vtype').value   = currentVehicleType;
+    $('f_start').value   = $('startTime').value;
+    $('f_end').value     = $('endTime').value;
+    $('f_method').value  = method;
+    $('f_ref').value     = ref;
+    $('hiddenForm').submit();
+  }
+
+  function closeModal() {
+    $('modalOverlay').classList.remove('open');
+    ppRendered = false;
+    $('paypal-button-container').innerHTML = '';
+    showStep(1);
+  }
+
+  function renderPayPal(fee) {
+    if (ppRendered) return;
+    ppRendered = true;
+    paypal.Buttons({
+      style: { layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' },
+      createOrder: (data, actions) => actions.order.create({
+        purchase_units: [{ description: "Robinson's Parking", amount: { currency_code: 'PHP', value: fee.toFixed(2) } }]
+      }),
+      onApprove: (data, actions) => actions.order.capture().then(details => submitForm('paypal', details.id)),
+      onError: () => { $('paypalError').textContent = 'PayPal error. Please try again.'; $('paypalError').style.display = 'block'; },
+      onCancel: () => { $('paypalError').textContent = 'Payment cancelled.'; $('paypalError').style.display = 'block'; },
+    }).render('#paypal-button-container');
+  }
+
+  document.querySelectorAll('.slot-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const d = card.dataset;
+      $('modalSlotLabel').textContent = d.number;
+      $('modalSlotType').textContent  = d.type;
+      showStep(1);
+
+      if (d.status === 'available') {
+        currentVehicleType              = typeMap[d.type] || 'Car';
+        $('modalTitle').textContent     = 'Reserve Slot';
+        $('viewPanel').style.display    = 'none';
+        $('reservePanel').style.display = 'block';
+        slotIdInput.value               = d.id;
+        $('fullName').value             = '';
+        $('plateNumber').value          = '';
+        $('reserveError').style.display = 'none';
+        $('startTime').value            = toLocal(new Date());
+        $('endTime').value              = toLocal(new Date(Date.now() + 3600000));
+        updateFee();
+      } else {
+        const statusMap = { available: 'Available', occupied: 'Occupied', reserved: 'Reserved' };
+        $('modalTitle').textContent      = d.status === 'occupied' ? 'Occupied Slot' : 'Reserved Slot';
+        $('viewPanel').style.display     = 'block';
+        $('reservePanel').style.display  = 'none';
+        $('infoNumber').textContent      = d.number;
+        $('infoType').textContent        = d.type;
+        $('infoPlate').textContent       = d.plate       || '—';
+        $('infoVehicleType').textContent = d.vehicleType || '—';
+        $('infoEntry').textContent       = d.entry       || '—';
+        $('infoExit').textContent        = d.exit        || '—';
+        $('infoStatus').textContent      = statusMap[d.status] || d.status;
+        $('infoStatus').className        = 'info-value status-' + d.status;
+        $('infoFee').textContent         = d.fee         || '—';
+        $('infoPayMethod').textContent   = METHOD_LABELS[d.payMethod] || d.payMethod || '—';
+        $('infoPayRef').textContent      = d.payRef      || '—';
+        $('infoPayStatus').textContent   = d.payStatus ? d.payStatus.charAt(0).toUpperCase() + d.payStatus.slice(1) : '—';
+        $('infoPayStatus').className     = 'info-value pay-status-' + (d.payStatus || '');
+        $('payInfoLabel').style.display  = d.payMethod && d.payMethod !== '—' ? 'block' : 'none';
+      }
+      $('modalOverlay').classList.add('open');
+    });
+  });
+
+  $('proceedToPayment').addEventListener('click', () => {
+    const name  = $('fullName').value.trim();
+    const plate = $('plateNumber').value.trim();
+    const start = $('startTime').value;
+    const end   = $('endTime').value;
+    const errEl = $('reserveError');
+
+    if (!name || !plate || !start || !end) { errEl.textContent = 'Please fill in all fields.';          errEl.style.display = 'block'; return; }
+    if (new Date(end) <= new Date(start))  { errEl.textContent = 'Exit time must be after entry time.'; errEl.style.display = 'block'; return; }
+    errEl.style.display = 'none';
+
+    const fee = getRate(currentVehicleType);
+    $('paySlot').textContent    = $('modalSlotLabel').textContent;
+    $('payVehicle').textContent = currentVehicleType;
+    $('payPlate').textContent   = plate;
+    $('payEntry').textContent   = start.replace('T', ' ');
+    $('payExit').textContent    = end.replace('T', ' ');
+    $('payTotal').textContent   = peso(fee);
+    showStep(2);
+    renderPayPal(fee);
+  });
+
+  document.querySelectorAll('.pay-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.pay-method-panel').forEach(p => p.style.display = 'none');
+      tab.classList.add('active');
+      $('method-' + tab.dataset.method).style.display = 'block';
+    });
+  });
+
+  ['modalClose', 'payClose', 'modalCancel', 'viewPanelClose'].forEach(id => $(id).addEventListener('click', closeModal));
+  $('codBack').addEventListener('click',      () => showStep(1));
+  $('codConfirm').addEventListener('click',   () => submitForm('pay_on_arrival', 'N/A'));
+  $('successClose').addEventListener('click', () => { closeModal(); window.location.reload(); });
+  $('modalOverlay').addEventListener('click', e => { if (e.target === $('modalOverlay')) closeModal(); });
+</script>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends "master.html" %}
+{% block content %}
+<h2>Pay for Parking Ticket #{{ ticket.id }}</h2>
+<p>Vehicle: {{ ticket.vehicle.plate_number }}</p>
+{{ form.render }}
+{% endblock %}

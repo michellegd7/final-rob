@@ -1,0 +1,351 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Parking Tickets — Guard{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="{% static 'guard_sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'guard_parking_ticket.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img src="{% static 'images/logo.png' %}" alt="logo">
+      <div class="logo-text">Guard Portal <span>Robinson's Parking</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="{% url 'guard_parking_slots' %}"  class="nav-item">Parking Slots</a>
+      <a href="{% url 'guard_parking_ticket' %}" class="nav-item active">Parking Ticket</a>
+      <a href="{% url 'guard_logout' %}"         class="nav-item">Logout</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="guard-profile">
+        <div>
+          <div class="guard-name">{{ guard.first_name }} {{ guard.last_name }}</div>
+          <div class="guard-role">Security Guard</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <h2>Parking Tickets</h2>
+        <p>View and manage parking reservations and receipts.</p>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="active">On Going <span class="tab-count" id="activeCount">0</span></button>
+        <button class="tab-btn" data-tab="completed">Done <span class="tab-count" id="completedCount">0</span></button>
+        <button class="tab-btn" data-tab="cancelled">Cancelled <span class="tab-count" id="cancelledCount">0</span></button>
+      </div>
+
+      <div class="tab-panel active" id="panel-active">
+        <div class="ticket-list">
+          {% for t in tickets %}{% if t.status == 'active' %}{% with pay=t.payment_set.last %}
+          <div class="ticket-card active-ticket">
+            <div class="ticket-strip"></div>
+            <div class="ticket-body">
+              <div class="ticket-info">
+                <div class="ticket-slot">{{ t.slot.slot_number }}</div>
+                <div class="ticket-type">{{ t.vehicle.vehicle_type }} · {{ t.vehicle.plate_number }}</div>
+                <span class="ticket-status status-active">On Going</span>
+              </div>
+              <div class="ticket-divider"></div>
+              <div class="ticket-times">
+                <div class="time-row">
+                  <span class="time-label">Check In</span>
+                  <span class="time-value">{{ t.entry_time|date:"M d, H:i" }}</span>
+                </div>
+                <div class="time-row">
+                  <span class="time-label">Expected Out</span>
+                  <span class="time-value">{{ t.exit_time|date:"M d, H:i"|default:"—" }}</span>
+                </div>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn-view"
+                  data-id="{{ t.id }}"
+                  data-slot="{{ t.slot.slot_number }}"
+                  data-type="{{ t.vehicle.vehicle_type }}"
+                  data-plate="{{ t.vehicle.plate_number }}"
+                  data-in="{{ t.entry_time|date:'M d, Y H:i' }}"
+                  data-out="{{ t.exit_time|date:'M d, Y H:i'|default:'—' }}"
+                  data-status="{{ t.status }}"
+                  data-pay-method="{% if pay %}{{ pay.payment_method }}{% else %}—{% endif %}"
+                  data-owner="{{ t.vehicle.owner_id }}"
+                  data-owner-name="{% if t.vehicle.owner %}{{ t.vehicle.owner.first_name }} {{ t.vehicle.owner.last_name }}{% else %}—{% endif %}"
+                >View</button>
+                <button class="btn-checkout"
+                  data-id="{{ t.id }}"
+                  data-slot="{{ t.slot.slot_number }}"
+                  data-plate="{{ t.vehicle.plate_number }}"
+                  data-type="{{ t.vehicle.vehicle_type }}"
+                  data-vehicle-id="{{ t.vehicle.id }}"
+                >Check Out</button>
+                <button class="btn-cancel-ticket" data-cancel="{{ t.id }}">Cancel</button>
+              </div>
+            </div>
+          </div>
+          {% endwith %}{% endif %}{% endfor %}
+          <div class="empty-state" id="emptyActive" style="display:none;">
+            <h3>No ongoing tickets</h3>
+            <p>No active vehicles right now.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-completed">
+        <div class="ticket-list">
+          {% for t in tickets %}{% if t.status == 'completed' %}{% with pay=t.payment_set.last %}
+          <div class="ticket-card expired-ticket">
+            <div class="ticket-strip"></div>
+            <div class="ticket-body">
+              <div class="ticket-info">
+                <div class="ticket-slot">{{ t.slot.slot_number }}</div>
+                <div class="ticket-type">{{ t.vehicle.vehicle_type }} · {{ t.vehicle.plate_number }}</div>
+                <span class="ticket-status status-expired">Done</span>
+              </div>
+              <div class="ticket-divider"></div>
+              <div class="ticket-times">
+                <div class="time-row">
+                  <span class="time-label">Check In</span>
+                  <span class="time-value">{{ t.entry_time|date:"M d, H:i" }}</span>
+                </div>
+                <div class="time-row">
+                  <span class="time-label">Check Out</span>
+                  <span class="time-value">{{ t.exit_time|date:"M d, H:i" }}</span>
+                </div>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn-view"
+                  data-id="{{ t.id }}"
+                  data-slot="{{ t.slot.slot_number }}"
+                  data-type="{{ t.vehicle.vehicle_type }}"
+                  data-plate="{{ t.vehicle.plate_number }}"
+                  data-in="{{ t.entry_time|date:'M d, Y H:i' }}"
+                  data-out="{{ t.exit_time|date:'M d, Y H:i' }}"
+                  data-status="{{ t.status }}"
+                  data-pay-method="{% if pay %}{{ pay.payment_method }}{% else %}—{% endif %}"
+                  data-owner="{{ t.vehicle.owner_id }}"
+                  data-owner-name="{% if t.vehicle.owner %}{{ t.vehicle.owner.first_name }} {{ t.vehicle.owner.last_name }}{% else %}—{% endif %}"
+                >View</button>
+              </div>
+            </div>
+          </div>
+          {% endwith %}{% endif %}{% endfor %}
+        </div>
+      </div>
+
+      <div class="tab-panel" id="panel-cancelled">
+        <div class="ticket-list">
+          {% for t in tickets %}{% if t.status == 'cancelled' %}
+          <div class="ticket-card cancelled-ticket">
+            <div class="ticket-strip"></div>
+            <div class="ticket-body">
+              <div class="ticket-info">
+                <div class="ticket-slot">{{ t.slot.slot_number }}</div>
+                <div class="ticket-type">{{ t.vehicle.vehicle_type }} · {{ t.vehicle.plate_number }}</div>
+                <span class="ticket-status status-cancelled">Cancelled</span>
+              </div>
+              <div class="ticket-divider"></div>
+              <div class="ticket-times">
+                <div class="time-row">
+                  <span class="time-label">Check In</span>
+                  <span class="time-value">{{ t.entry_time|date:"M d, H:i" }}</span>
+                </div>
+              </div>
+              <div class="ticket-actions">
+                <button class="btn-view"
+                  data-id="{{ t.id }}"
+                  data-slot="{{ t.slot.slot_number }}"
+                  data-type="{{ t.vehicle.vehicle_type }}"
+                  data-plate="{{ t.vehicle.plate_number }}"
+                  data-in="{{ t.entry_time|date:'M d, Y H:i' }}"
+                  data-out="—"
+                  data-status="{{ t.status }}"
+                  data-pay-method="—"
+                  data-owner="{{ t.vehicle.owner_id }}"
+                  data-owner-name="{% if t.vehicle.owner %}{{ t.vehicle.owner.first_name }} {{ t.vehicle.owner.last_name }}{% else %}—{% endif %}"
+                >View</button>
+              </div>
+            </div>
+          </div>
+          {% endif %}{% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="ticket-modal">
+    <div class="modal-ticket-header">
+      <h2>Parking Ticket</h2>
+      <div class="ref" id="modalRef">REF: TKT-000000</div>
+      <button class="modal-close-btn" id="modalClose">✕</button>
+    </div>
+    <div class="tear-line">
+      <div class="tear-circle"></div>
+      <div class="tear-dashes"></div>
+      <div class="tear-circle"></div>
+    </div>
+    <div class="modal-ticket-body">
+      <div class="modal-rows">
+        <div class="modal-row"><span class="modal-row-label">Owner ID</span>       <span class="modal-row-value" id="modalOwner">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Owner Name</span>     <span class="modal-row-value" id="modalOwnerName">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Slot</span>           <span class="modal-row-value" id="modalSlot">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Type</span>           <span class="modal-row-value" id="modalType">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Plate Number</span>   <span class="modal-row-value" id="modalPlate">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Park In</span>        <span class="modal-row-value" id="modalIn">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Park Out</span>       <span class="modal-row-value" id="modalOut">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Status</span>         <span class="modal-row-value" id="modalStatus">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Payment Method</span> <span class="modal-row-value" id="modalPayMethod">—</span></div>
+      </div>
+      <div class="modal-footer-btns">
+        <button class="btn-close-modal" id="modalCloseBottom">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="checkoutOverlay">
+  <div class="ticket-modal" style="max-width:380px;">
+    <div class="modal-ticket-header">
+      <h2>Check Out Vehicle</h2>
+      <div class="ref" id="checkoutRef">—</div>
+      <button type="button" class="modal-close-btn" id="checkoutClose">✕</button>
+    </div>
+    <div class="tear-line">
+      <div class="tear-circle"></div>
+      <div class="tear-dashes"></div>
+      <div class="tear-circle"></div>
+    </div>
+    <div class="modal-ticket-body">
+      <div class="modal-rows" style="margin-bottom:1.2rem;">
+        <div class="modal-row"><span class="modal-row-label">Vehicle ID</span>  <span class="modal-row-value" id="coVehicleId">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Slot</span>        <span class="modal-row-value" id="coSlot">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Plate</span>       <span class="modal-row-value" id="coPlate">—</span></div>
+        <div class="modal-row"><span class="modal-row-label">Vehicle Type</span><span class="modal-row-value" id="coType">—</span></div>
+      </div>
+      <div class="checkout-time-group">
+        <label for="checkoutTime">Check Out Time</label>
+        <input type="datetime-local" id="checkoutTime" />
+      </div>
+      <div id="checkoutError" style="color:#d0021b;font-size:0.82rem;margin-bottom:0.8rem;display:none;">
+        Please set a check out time.
+      </div>
+      <div class="modal-footer-btns">
+        <button type="button" class="btn-close-modal" id="checkoutCancel">Cancel</button>
+        <button type="button" class="btn-confirm-checkout" id="checkoutConfirm">Confirm Check Out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form method="POST" id="checkoutForm" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="exit_time" id="f_exit_time" />
+  <input type="hidden" name="guard_id" value="{{ guard.id }}" />
+</form>
+
+<script>
+  const sMap   = { active: 'On Going', completed: 'Done', cancelled: 'Cancelled' };
+  const payMap = { paypal: 'PayPal', pay_on_arrival: 'Pay on Arrival' };
+
+  let activeCount = 0, completedCount = 0, cancelledCount = 0;
+  document.querySelectorAll('.ticket-card').forEach(c => {
+    if (c.classList.contains('active-ticket'))    activeCount++;
+    if (c.classList.contains('expired-ticket'))   completedCount++;
+    if (c.classList.contains('cancelled-ticket')) cancelledCount++;
+  });
+  document.getElementById('activeCount').textContent    = activeCount;
+  document.getElementById('completedCount').textContent = completedCount;
+  document.getElementById('cancelledCount').textContent = cancelledCount;
+  if (activeCount === 0) document.getElementById('emptyActive').style.display = 'block';
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function openModal(btn) {
+    const d = btn.dataset;
+    document.getElementById('modalRef').textContent        = 'REF: TKT-' + String(d.id).padStart(6, '0');
+    document.getElementById('modalOwner').textContent      = d.owner || '—';
+    document.getElementById('modalOwnerName').textContent  = d.ownerName || '—';
+    document.getElementById('modalSlot').textContent       = d.slot;
+    document.getElementById('modalType').textContent       = d.type;
+    document.getElementById('modalPlate').textContent      = d.plate;
+    document.getElementById('modalIn').textContent         = d.in;
+    document.getElementById('modalOut').textContent        = d.out;
+    document.getElementById('modalStatus').textContent     = sMap[d.status] || d.status;
+    document.getElementById('modalPayMethod').textContent  = payMap[d.payMethod] || d.payMethod || '—';
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+  document.querySelectorAll('.btn-view').forEach(btn => btn.addEventListener('click', () => openModal(btn)));
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCloseBottom').addEventListener('click', closeModal);
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  });
+
+  function toLocal(date) {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  }
+  function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
+
+  document.querySelectorAll('.btn-checkout').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('checkoutForm').action     = `/guard_checkout/${btn.dataset.id}/`;
+      document.getElementById('checkoutRef').textContent = 'TKT-' + String(btn.dataset.id).padStart(6, '0');
+      document.getElementById('coVehicleId').textContent = '#' + btn.dataset.vehicleId;
+      document.getElementById('coSlot').textContent      = btn.dataset.slot;
+      document.getElementById('coPlate').textContent     = btn.dataset.plate;
+      document.getElementById('coType').textContent      = btn.dataset.type;
+      document.getElementById('checkoutTime').value      = toLocal(new Date());
+      document.getElementById('checkoutError').style.display = 'none';
+      document.getElementById('checkoutOverlay').classList.add('open');
+    });
+  });
+
+  document.getElementById('checkoutClose').addEventListener('click', closeCheckout);
+  document.getElementById('checkoutCancel').addEventListener('click', closeCheckout);
+  document.getElementById('checkoutOverlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('checkoutOverlay')) closeCheckout();
+  });
+  document.getElementById('checkoutConfirm').addEventListener('click', () => {
+    const time = document.getElementById('checkoutTime').value;
+    if (!time) { document.getElementById('checkoutError').style.display = 'block'; return; }
+    document.getElementById('f_exit_time').value = time;
+    document.getElementById('checkoutForm').submit();
+  });
+
+  document.querySelectorAll('.btn-cancel-ticket').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!confirm('Cancel this ticket?')) return;
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/guard_cancel_ticket/${btn.dataset.cancel}/`;
+      form.innerHTML = `{% csrf_token %}`;
+      document.body.appendChild(form);
+      form.submit();
+    });
+  });
+</script>
+{% endblock %}
